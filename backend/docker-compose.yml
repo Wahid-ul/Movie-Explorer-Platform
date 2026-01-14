@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: movie_db
+      POSTGRES_USER: movie_user
+      POSTGRES_PASSWORD: movie_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    depends_on:
+      - db
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    command: >
+      sh -c "
+      flask --app run.py db upgrade &&
+      flask --app run.py seed &&
+      flask --app run.py run --host=0.0.0.0
+      "
+
+volumes:
+  pgdata:
