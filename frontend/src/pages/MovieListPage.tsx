@@ -1,70 +1,32 @@
-// pages/MovieListPage.tsx
-import { useDispatch, useSelector } from "react-redux";
-import {
-  Container,
-  Typography,
-  TextField,
-  Stack,
-  CircularProgress,
-  Button,
-} from "@mui/material";
-import { setFilter, resetFilter, type MovieFilterState } from "../features/filters/movieFilterSlice";
+import { Container, Box, Typography } from "@mui/material";
 import { useMovies } from "../hooks/useMovies";
-import MovieCard from "../components/MovieCard";
-import type { RootState } from "../app/store";
+import MovieSection from "../components/MovieSection";
 
 export default function MovieListPage() {
-  const dispatch = useDispatch();
-  const filters = useSelector((state: RootState) => state.movieFilters);
-  const { data: movies, isLoading, error } = useMovies();
+  const { data: movies, isLoading } = useMovies();
 
-  const handleInputChange = (field: keyof MovieFilterState, value: string) => {
-    dispatch(setFilter({ [field]: value }));
-  };
+  if (isLoading) return <p>Loading...</p>;
 
-  const handleReset = () => {
-    dispatch(resetFilter());
-  };
+  const hollywood = movies?.filter((m) => m.industry === "Hollywood") || [];
+  const bollywood = movies?.filter((m) => m.industry === "Bollywood") || [];
+  const tamil = movies?.filter((m) => m.industry === "Tamil") || [];
 
   return (
-    <Container sx={{ mt: 4 }}>
-      <Typography variant="h4" mb={2}>
-        Movies
-      </Typography>
-
-      {/* Filters */}
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={3}>
-        <TextField
-          label="Genre"
-          value={filters.genre || ""}
-          onChange={(e) => handleInputChange("genre", e.target.value)}
-          size="small"
-        />
-        <TextField
-          label="Actor"
-          value={filters.actor || ""}
-          onChange={(e) => handleInputChange("actor", e.target.value)}
-          size="small"
-        />
-        <TextField
-          label="Director"
-          value={filters.director || ""}
-          onChange={(e) => handleInputChange("director", e.target.value)}
-          size="small"
-        />
-        <Button variant="outlined" onClick={handleReset}>
-          Reset
-        </Button>
-      </Stack>
-
-      {/* Movie List */}
-      {isLoading && <CircularProgress />}
-      {error && <Typography color="error">{error.message}</Typography>}
-      <Stack spacing={2}>
-        {movies?.map((movie) => (
-          <MovieCard key={movie.id} movie={movie} />
-        ))}
-      </Stack>
-    </Container>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: `
+          radial-gradient(circle at top, #2b0000 0%, #0b0b0b 40%),
+          linear-gradient(180deg, #141414 0%, #000000 100%)
+        `,
+        py: 6,
+      }}
+    >
+      <Container>
+        <MovieSection title="Hollywood" movies={hollywood} />
+        <MovieSection title="Bollywood" movies={bollywood} />
+        <MovieSection title="Tamil Movies" movies={tamil} />
+      </Container>
+    </Box>
   );
 }

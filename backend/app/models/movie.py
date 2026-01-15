@@ -9,6 +9,7 @@ class Movie(db.Model):
     release_year = db.Column(db.Integer, nullable=False)
     rating = db.Column(db.Float)
 
+    poster_url = db.Column(db.String(255))
     director_id = db.Column(db.Integer, db.ForeignKey("directors.id"), nullable=False)
 
     director = db.relationship("Director", back_populates="movies")
@@ -24,6 +25,7 @@ class Movie(db.Model):
         secondary=movie_genre,
         back_populates="movies"
     )
+    industry = db.Column(db.String(50))  # Hollywood, Bollywood, Tamil
 
     def __repr__(self):
         return f"<Movie {self.title} ({self.release_year})>"

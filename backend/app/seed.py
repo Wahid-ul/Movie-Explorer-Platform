@@ -41,7 +41,8 @@ def seed_data():
         rating=8.8,
         director=nolan,
         actors=[dicaprio, hardy],
-        genres=[scifi, action, thriller]
+        genres=[scifi, action, thriller],
+        industry="Hollywood"
     )
 
     dark_knight = Movie(
@@ -50,7 +51,8 @@ def seed_data():
         rating=9.0,
         director=nolan,
         actors=[bale, hardy],
-        genres=[action, drama, thriller]
+        genres=[action, drama, thriller],
+        industry="Hollywood"
     )
 
     saving_private_ryan = Movie(
@@ -59,7 +61,8 @@ def seed_data():
         rating=8.6,
         director=spielberg,
         actors=[hanks],
-        genres=[drama, action]
+        genres=[drama, action],
+        industry="Hollywood"
     )
 
     # Bollywood Movies
@@ -69,7 +72,8 @@ def seed_data():
         rating=8.4,
         director=rajkumar_hirani,
         actors=[aamir],
-        genres=[comedy, drama]
+        genres=[comedy, drama],
+        industry="Bollywood"
     )
 
     pk = Movie(
@@ -78,7 +82,8 @@ def seed_data():
         rating=8.1,
         director=rajkumar_hirani,
         actors=[aamir],
-        genres=[comedy, drama, scifi]
+        genres=[comedy, drama, scifi],
+        industry="Bollywood"
     )
 
     chak_de = Movie(
@@ -87,7 +92,8 @@ def seed_data():
         rating=8.2,
         director=rajkumar_hirani,
         actors=[srk],
-        genres=[drama]
+        genres=[drama],
+        industry="Bollywood"
     )
 
     # South Indian Movies
@@ -97,7 +103,8 @@ def seed_data():
         rating=8.0,
         director=ss_rajamouli,
         actors=[prabhas, rana],
-        genres=[action, drama]
+        genres=[action, drama],
+        industry="Tamil"
     )
 
     bahubali2 = Movie(
@@ -106,7 +113,8 @@ def seed_data():
         rating=8.2,
         director=ss_rajamouli,
         actors=[prabhas, rana],
-        genres=[action, drama, romance]
+        genres=[action, drama, romance],
+        industry="Tamil"
     )
 
     rrr = Movie(
@@ -115,7 +123,8 @@ def seed_data():
         rating=8.0,
         director=ss_rajamouli,
         actors=[prabhas],
-        genres=[action, drama, thriller]
+        genres=[action, drama, thriller],
+        industry="Tamil"
     )
 
     db.session.add_all([

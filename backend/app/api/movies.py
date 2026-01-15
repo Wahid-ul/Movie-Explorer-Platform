@@ -12,14 +12,27 @@ movie_filter_parser.add_argument('director', type=str)
 movie_filter_parser.add_argument('year', type=int)
 
 # ---------- Swagger Models ----------
+
+person_model = movies_ns.model('Person', {
+    'id': fields.Integer,
+    'name': fields.String
+})
+
+genre_model = movies_ns.model('Genre', {
+    'id': fields.Integer,
+    'name': fields.String
+})
+
 movie_model = movies_ns.model('Movie', {
     'id': fields.Integer(readOnly=True),
     'title': fields.String(required=True),
     'release_year': fields.Integer,
     'rating': fields.Float,
-    'director': fields.String,
-    'actors': fields.List(fields.String),
-    'genres': fields.List(fields.String),
+    'poster_url': fields.String,
+    'director': fields.Nested(person_model),
+    'actors': fields.List(fields.Nested(person_model)),
+    'genres': fields.List(fields.Nested(genre_model)),
+    'industry': fields.String
 })
 
 movie_create_model = movies_ns.model('MovieCreate', {
@@ -30,6 +43,7 @@ movie_create_model = movies_ns.model('MovieCreate', {
     'actor_ids': fields.List(fields.Integer),
     'genre_ids': fields.List(fields.Integer),
 })
+
 
 # ---------- Routes ----------
 @movies_ns.route('/')
@@ -49,12 +63,12 @@ class MovieList(Resource):
             query = query.join(Movie.actors).filter(Actor.name.ilike(f"%{args['actor']}%"))
 
         if args['director']:
-            query = query.join(Director).filter(Director.name.ilike(f"%{args['director']}%"))
+            query = query.join(Movie.director).filter(Director.name.ilike(f"%{args['director']}%"))
 
         if args['year']:
             query = query.filter(Movie.release_year == args['year'])
 
-        movies = query.all()
+        movies = query.distinct().all()   # <<< THIS FIX PREVENTS POSTGRES CRASH
         return [serialize_movie(m) for m in movies]
 
     @movies_ns.expect(movie_create_model)
@@ -119,7 +133,16 @@ def serialize_movie(movie):
         'title': movie.title,
         'release_year': movie.release_year,
         'rating': movie.rating,
-        'director': movie.director.name if movie.director else None,
-        'actors': [a.name for a in movie.actors],
-        'genres': [g.name for g in movie.genres]
+        'poster_url': movie.poster_url,
+        'director': {
+            'id': movie.director.id,
+            'name': movie.director.name
+        } if movie.director else None,
+        'actors': [
+            {'id': a.id, 'name': a.name} for a in movie.actors
+        ],
+        'genres': [
+            {'id': g.id, 'name': g.name} for g in movie.genres
+        ],
+        'industry': movie.industry
     }
