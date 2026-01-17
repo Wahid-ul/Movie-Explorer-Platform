@@ -1,6 +1,10 @@
 .env
+.env.docker
 backend/venv/
 __pycache__/
+.pytest_cache/
 *.pyc
 migrations/
 pgdata/
+/frontend/.gitignore
+/backend/docker-compose.yml
