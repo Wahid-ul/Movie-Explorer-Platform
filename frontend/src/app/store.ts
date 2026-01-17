@@ -1,10 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
 import movieFilterReducer from "../features/filters/movieFilterSlice";
+import favouriteReducer from "../features/favourites/favouriteSlice";
+import watchLaterReducer from "../features/watchLater/watchLaterSlice";
 
 export const store = configureStore({
   reducer: {
-    
-    movieFilters: movieFilterReducer
+
+    movieFilters: movieFilterReducer,
+    favourites: favouriteReducer,
+    watchLater: watchLaterReducer
   }
 });
 

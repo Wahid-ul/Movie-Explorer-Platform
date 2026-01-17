@@ -6,4 +6,6 @@ export interface Actor {
   bio?: string;
   birth_year?: number;
   movies: Movie[]; // list of movies this actor worked in
+  actor_hero_image_url: string;
+  actor_cast_image_url: string;
 }

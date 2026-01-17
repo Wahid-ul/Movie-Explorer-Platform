@@ -1,65 +1,76 @@
-// pages/ActorProfilePage.tsx
-import { useParams, Link as RouterLink } from "react-router-dom";
-import {
-  Container,
-  Typography,
-  CircularProgress,
-  Stack,
-  Chip,
-  Card,
-  CardContent,
-} from "@mui/material";
+import { Box, Typography, Container } from "@mui/material";
 import { motion } from "framer-motion";
+import { useParams } from "react-router-dom";
 import { useActor } from "../hooks/useActor";
+import ActorMovieCard from "../components/ActorMovieCard";
 
 export default function ActorProfilePage() {
   const { id } = useParams<{ id: string }>();
-  const { data: actor, isLoading, error } = useActor(id!);
+  const { data: actor, isLoading } = useActor(id!);
 
-  if (isLoading) return <CircularProgress />;
-  if (error) return <Typography color="error">{error.message}</Typography>;
-  if (!actor) return null;
+  if (isLoading || !actor) return null;
 
   return (
-    <Container sx={{ mt: 4 }}>
-      {/* Actor Info */}
-      <Typography variant="h3">{actor.name}</Typography>
-      {actor.birth_year && (
-        <Typography variant="subtitle1">Born: {actor.birth_year}</Typography>
-      )}
-      {actor.bio && <Typography paragraph>{actor.bio}</Typography>}
+    <>
+      {/* HERO */}
+      <Box
+        sx={{
+          height: "100vh",
+          backgroundImage: `url(http://localhost:5000${actor.actor_hero_image_url})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          position: "relative",
+        }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.25))",
+          }}
+        />
 
-      {/* Actor Movies */}
-      <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
-        Movies
-      </Typography>
-      <Stack spacing={2}>
-        {actor.movies.map((movie) => (
-          <motion.div
-            key={movie.id}
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Card
-              component={RouterLink}
-              to={`/movies/${movie.id}`}
-              sx={{ textDecoration: "none", borderRadius: 3 }}
-            >
-              <CardContent>
-                <Typography variant="h6">{movie.title}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {movie.release_year} • Directed by {movie.director.name}
-                </Typography>
-                <Stack direction="row" spacing={1} mt={1}>
-                  {movie.genres.map((g) => (
-                    <Chip key={g.id} label={g.name} size="small" />
-                  ))}
-                </Stack>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </Stack>
-    </Container>
+        <Box
+          component={motion.div}
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          sx={{
+            position: "absolute",
+            bottom: 50,
+            left: 50,
+            color: "white",
+          }}
+        >
+          <Typography variant="h3" fontWeight="bold">
+            {actor.name}
+          </Typography>
+
+          
+        </Box>
+      </Box>
+
+      {/* MOVIES */}
+      <Container sx={{ py: 6 }}>
+        <Typography variant="h5" sx={{  mb: 3 }}>
+          Filmography
+        </Typography>
+
+        <Box
+          sx={{
+            display: "flex",
+            gap: 3,
+            overflowX: "auto",
+            pb: 4,
+            "&::-webkit-scrollbar": { display: "none" },
+          }}
+        >
+          {actor.movies.map((movie) => (
+            <ActorMovieCard key={movie.id} movie={movie} />
+          ))}
+        </Box>
+      </Container>
+
+    </>
   );
 }

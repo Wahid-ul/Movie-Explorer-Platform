@@ -3,14 +3,26 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit"; // ✅ type-only import
 
 
+
+export type SearchType = "all" | "movie" | "actor" | "director";
+
 export interface MovieFilterState {
+  search?: string;
+  searchType?: SearchType; 
   genre?: string;
   actor?: string;
   director?: string;
   year?: number;
 }
 
-const initialState: MovieFilterState = {};
+const initialState: MovieFilterState = {
+  genre: undefined,
+  actor: undefined,
+  director: undefined,
+  year: undefined,
+  search: "",
+  searchType: "all",
+};
 
 const movieFilterSlice = createSlice({
   name: "movieFilter",

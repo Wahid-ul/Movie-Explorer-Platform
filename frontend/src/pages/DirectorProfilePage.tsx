@@ -1,66 +1,71 @@
-// pages/DirectorProfilePage.tsx
-import { useParams, Link as RouterLink } from "react-router-dom";
-import {
-  Container,
-  Typography,
-  CircularProgress,
-  Stack,
-  Chip,
-  Card,
-  CardContent,
-} from "@mui/material";
-import { motion } from "framer-motion";
+import { Box, Container, Typography } from "@mui/material";
+import { useParams } from "react-router-dom";
 import { useDirector } from "../hooks/useDirector";
+import DirectorMovieCard from "../components/DirectorMovieCard";
 
 export default function DirectorProfilePage() {
   const { id } = useParams<{ id: string }>();
-  const { data: director, isLoading, error } = useDirector(id!);
+  const { data: director, isLoading } = useDirector(id!);
 
-  if (isLoading) return <CircularProgress />;
-  if (error) return <Typography color="error">{error.message}</Typography>;
+  if (isLoading) return null;
   if (!director) return null;
 
   return (
-    <Container sx={{ mt: 4 }}>
-      {/* Director Info */}
-      <Typography variant="h3">{director.name}</Typography>
-      {director.birth_year && (
-        <Typography variant="subtitle1">Born: {director.birth_year}</Typography>
-      )}
-      {director.bio && <Typography paragraph>{director.bio}</Typography>}
+    <>
+      {/* HERO SECTION */}
+      <Box
+        sx={{
+          height: "80vh",
+          backgroundImage: `url(http://localhost:5000${director.director_hero_image_url})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          position: "relative",
+        }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.2))",
+          }}
+        />
+        <Container
+          sx={{
+            position: "absolute",
+            bottom: 40,
+            left: 40,
+            color: "#fff",
+          }}
+        >
+          <Typography variant="h3" fontWeight="bold">
+            {director.name}
+          </Typography>
+          <Typography sx={{ opacity: 0.85, mt: 1 }}>
+            Directed {director.movies.length} {director.movies.length > 1 ? "movies" : "movie"}
+          </Typography>
+        </Container>
+      </Box>
 
-      {/* Director Movies */}
-      <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
-        Movies Directed
-      </Typography>
-      <Stack spacing={2}>
-        {director.movies.map((movie) => (
-          <motion.div
-            key={movie.id}
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Card
-              component={RouterLink}
-              to={`/movies/${movie.id}`}
-              sx={{ textDecoration: "none", borderRadius: 3 }}
-            >
-              <CardContent>
-                <Typography variant="h6">{movie.title}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {movie.release_year} • Actors:{" "}
-                  {movie.actors.map((a) => a.name).join(", ")}
-                </Typography>
-                <Stack direction="row" spacing={1} mt={1}>
-                  {movie.genres.map((g) => (
-                    <Chip key={g.id} label={g.name} size="small" />
-                  ))}
-                </Stack>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </Stack>
-    </Container>
+      {/* BELOW HERO – FILMOGRAPHY */}
+      <Container sx={{ py: 6 }}>
+        <Typography variant="h5" sx={{  mb: 3 }}>
+          Filmography
+        </Typography>
+
+        <Box
+          sx={{
+            display: "flex",
+            gap: 3,
+            overflowX: "auto",
+            pb: 4,
+            "&::-webkit-scrollbar": { display: "none" },
+          }}
+        >
+          {director.movies.map((movie) => (
+            <DirectorMovieCard key={movie.id} movie={movie} />
+          ))}
+        </Box>
+      </Container>
+    </>
   );
 }
