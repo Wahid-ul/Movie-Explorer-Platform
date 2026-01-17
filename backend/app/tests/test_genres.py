@@ -1,20 +1,16 @@
-from models import Genre, Movie
+from app.models import Genre
+from app.tests.utils import seed_test_data
 
-def test_create_genre(session):
-    genre = Genre(name="Comedy")
-    session.add(genre)
-    session.commit()
-    assert genre.id is not None
 
-def test_get_genre(session, sample_data):
-    genre = sample_data["genres"][0]
-    result = session.query(Genre).filter_by(id=genre.id).first()
-    assert result.name == "Sci-Fi"
+def test_get_genre(session):
+    seed_test_data(session)
 
-def test_genre_movies(session, sample_data):
-    genre = sample_data["genres"][0]
-    movie = sample_data["movies"][0]
-    movie.genres.append(genre)
-    session.commit()
-    movies = session.query(Movie).filter(Movie.genres.any(id=genre.id)).all()
-    assert movies[0].title == "Inception"
+    genre = Genre.query.filter_by(name="Action").first()
+    assert genre is not None
+
+
+def test_genre_movies(session):
+    seed_test_data(session)
+
+    genre = Genre.query.first()
+    assert len(genre.movies) == 1

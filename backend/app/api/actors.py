@@ -10,11 +10,24 @@ actor_filter_parser.add_argument('movie', type=str)
 actor_filter_parser.add_argument('genre', type=str)
 
 # Response model
+movie_summary_model = actors_ns.model('MovieSummary', {
+    'id': fields.Integer,
+    'title': fields.String,
+    'poster_url': fields.String,
+    'movie_poster_url': fields.String,
+    'rating': fields.Float,
+    'release_year': fields.Integer
+})
+
 actor_model = actors_ns.model('Actor', {
     'id': fields.Integer(readOnly=True),
     'name': fields.String(required=True),
-    'movies': fields.List(fields.String),
+    'actor_hero_image_url': fields.String,
+    'actor_cast_image_url': fields.String,
+    'movies': fields.List(fields.Nested(movie_summary_model))
 })
+
+
 
 @actors_ns.route('/')
 class ActorList(Resource):
@@ -35,11 +48,7 @@ class ActorList(Resource):
         actors = query.all()
         result = []
         for actor in actors:
-            result.append({
-                'id': actor.id,
-                'name': actor.name,
-                'movies': [m.title for m in actor.movies]
-            })
+            result.append(serialize_actor(actor))
         return result
 
     @actors_ns.expect(actor_model)
@@ -59,12 +68,8 @@ class ActorResource(Resource):
     @actors_ns.marshal_with(actor_model)
     def get(self, id):
         actor = Actor.query.get_or_404(id)
-        return {
-            'id': actor.id,
-            'name': actor.name,
-            'movies': [m.title for m in actor.movies]
-        }
-
+        return serialize_actor(actor)
+    
     def delete(self, id):
         actor = Actor.query.get_or_404(id)
         db.session.delete(actor)
@@ -79,3 +84,21 @@ class ActorResource(Resource):
         actor.name = data['name']
         db.session.commit()
         return actor
+def serialize_actor(actor):
+    return {
+        "id": actor.id,
+        "name": actor.name,
+        "actor_hero_image_url": actor.actor_hero_image_url,
+        "actor_cast_image_url": actor.actor_cast_image_url,
+        "movies": [
+            {
+                "id": m.id,
+                "title": m.title,
+                "poster_url": m.poster_url,
+                "movie_poster_url": m.movie_poster_url,
+                "rating": m.rating,
+                "release_year": m.release_year,
+            }
+            for m in actor.movies
+        ]
+    }

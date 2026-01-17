@@ -1,9 +1,9 @@
 from app.main import create_app
-from app.seed import seed_data
+from app.seeds.seed_all import seed_everything
 
 app = create_app()
 
 @app.cli.command("seed")
 def seed():
-    """Seed the database with sample data"""
-    seed_data()
+    """Seed the entire database with sample data"""
+    seed_everything()

@@ -13,10 +13,20 @@ movie_filter_parser.add_argument('year', type=int)
 
 # ---------- Swagger Models ----------
 
-person_model = movies_ns.model('Person', {
+director_model = movies_ns.model('Director', {
     'id': fields.Integer,
-    'name': fields.String
+    'name': fields.String,
+    'director_hero_image_url': fields.String,
+    'director_cast_image_url': fields.String
 })
+
+actor_model = movies_ns.model('Actor', {
+    'id': fields.Integer,
+    'name': fields.String,
+    'actor_hero_image_url': fields.String,
+    'actor_cast_image_url': fields.String
+})
+
 
 genre_model = movies_ns.model('Genre', {
     'id': fields.Integer,
@@ -29,10 +39,12 @@ movie_model = movies_ns.model('Movie', {
     'release_year': fields.Integer,
     'rating': fields.Float,
     'poster_url': fields.String,
-    'director': fields.Nested(person_model),
-    'actors': fields.List(fields.Nested(person_model)),
+    'movie_poster_url': fields.String,
+    'director': fields.Nested(director_model),
+    'actors': fields.List(fields.Nested(actor_model)),
     'genres': fields.List(fields.Nested(genre_model)),
-    'industry': fields.String
+    'industry': fields.String,
+    'movie_description': fields.String
 })
 
 movie_create_model = movies_ns.model('MovieCreate', {
@@ -134,15 +146,19 @@ def serialize_movie(movie):
         'release_year': movie.release_year,
         'rating': movie.rating,
         'poster_url': movie.poster_url,
+        'movie_poster_url': movie.movie_poster_url,
         'director': {
             'id': movie.director.id,
-            'name': movie.director.name
+            'name': movie.director.name,
+            'director_hero_image_url': movie.director.director_hero_image_url,
+            'director_cast_image_url': movie.director.director_cast_image_url
         } if movie.director else None,
         'actors': [
-            {'id': a.id, 'name': a.name} for a in movie.actors
+            {'id': a.id, 'name': a.name, 'actor_hero_image_url': a.actor_hero_image_url, 'actor_cast_image_url': a.actor_cast_image_url} for a in movie.actors
         ],
         'genres': [
             {'id': g.id, 'name': g.name} for g in movie.genres
         ],
-        'industry': movie.industry
+        'industry': movie.industry,
+        'movie_description': movie.movie_description
     }

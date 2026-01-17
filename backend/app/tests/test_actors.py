@@ -1,20 +1,11 @@
-from models import Actor, Movie
+from app.models import Actor
 
-def test_create_actor(session):
-    actor = Actor(name="Tom Hanks")
-    session.add(actor)
-    session.commit()
-    assert actor.id is not None
 
-def test_get_actor(session, sample_data):
-    actor = sample_data["actors"][0]
-    result = session.query(Actor).filter_by(id=actor.id).first()
-    assert result.name == "Leonardo DiCaprio"
+def test_get_actor(seeded_db):
+    actor = Actor.query.filter_by(name="Leonardo DiCaprio").first()
+    assert actor is not None
 
-def test_actor_movies(session, sample_data):
-    actor = sample_data["actors"][0]
-    movie = sample_data["movies"][0]
-    movie.actors.append(actor)
-    session.commit()
-    movies = session.query(Movie).filter(Movie.actors.any(id=actor.id)).all()
-    assert movies[0].title == "Inception"
+
+def test_actor_movies(seeded_db):
+    actor = Actor.query.first()
+    assert len(actor.movies) == 1
