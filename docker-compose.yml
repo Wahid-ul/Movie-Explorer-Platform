@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+
+  db:
+    image: postgres:15
+    container_name: cineverse-db
+    env_file:
+      - backend/.env.docker
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    container_name: cineverse-backend
+    depends_on:
+      - db
+    env_file:
+      - backend/.env.docker
+    ports:
+      - "5000:5000"
+    command: >
+      sh -c "
+      flask --app run.py db upgrade &&
+      flask --app run.py seed &&
+      flask --app run.py run --host=0.0.0.0
+      "
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: cineverse-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"   # Nginx serves on 80, mapped to 5173 locally
+    environment:
+      - VITE_API_BASE_URL=http://backend:5000/api
+
+volumes:
+  pgdata:
