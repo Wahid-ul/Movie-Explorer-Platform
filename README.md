@@ -117,7 +117,7 @@ frontend/
     
     ```
     FLASK_ENV=development
-    DATABASE_URL=postgresql://user:password@localhost:5432/moviedb
+    DATABASE_URL=postgresql://user:password@localhost:5432/movie_explorer
     SECRET_KEY=your-secret
     ```
 
@@ -125,7 +125,7 @@ frontend/
     ### backend/.env.docker
     ```
     FLASK_ENV=production
-    DATABASE_URL=postgresql://postgres:postgres@db:5432/moviedb
+    DATABASE_URL=postgresql://user:password@db:5432/movie_explorer
     ```
 
 
