@@ -52,15 +52,20 @@ Redux (UI State)
 ```
 backend/
 ├── app/
-│ ├── main.py # Flask app entry
-│ ├── models/ # SQLAlchemy models
-│ ├── routes/ # API endpoints
-│ ├── schemas/ # Pydantic / Marshmallow schemas
-│ ├── services/ # Business logic & filtering
-│ └── tests/ # Unit tests
-├── Dockerfile
-├── requirements.txt
-└── docker-compose.yml
+│   ├── config.py        # App configuration (env, DB, settings)
+│   ├── extensions/      # Flask extensions (db, migrate)
+│   ├── main.py          # Flask app factory / initialization
+│   ├── api/             # API blueprints 
+│   ├── models/          # SQLAlchemy ORM models
+│   ├── routes/          # Route handlers / controllers
+│   ├── schemas/         # Serialization & validation (Marshmallow)
+│   ├── seeds/           # Database seed scripts / fixtures
+│   ├── static/          # Static files (if served by Flask)
+│   └── tests/           # Unit & integration tests
+├── run.py               # Application entry point
+├── requirements.txt     # Python dependencies
+└── Dockerfile           # Backend container configuration
+
 ```
 
 **Frontend**
@@ -68,15 +73,28 @@ backend/
 ```
 frontend/
 ├── src/
-│ ├── app/store.ts
-│ ├── features/ # Redux slices
-│ ├── api/ # API client
-│ ├── pages/ # Page components
-│ ├── components/ # UI components
-│ └── main.tsx # React entry
-├── Dockerfile
-├── vite.config.ts
-└── package.json
+│   ├── api/             # API clients / Axios services
+│   ├── app/
+│   │   └── store.ts     # Redux store configuration
+│   ├── components/     # Reusable UI components
+│   ├── features/       # Redux slices / feature modules
+│   ├── hooks/           # Custom React hooks
+│   ├── pages/           # Page-level components (routes)
+│   ├── routes/          # Route definitions / guards
+│   ├── tests/           # Frontend tests
+│   ├── theme/           # Styling, themes, design tokens
+│   ├── types/           # Global TypeScript types
+│   ├── App.tsx          # Root React component
+│   └── main.tsx         # React entry point
+├── Dockerfile           # Frontend container
+├── nginx.conf           # Nginx config for production/Dockerisation
+├── index.html           # HTML entry
+├── eslint.config.js     # Linting config
+├── package.json
+├── package-lock.json
+├── tsconfig*.json       # TypeScript configs
+└── vite.config.ts       # Vite config
+
 ```
 
 
