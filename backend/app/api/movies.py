@@ -1,4 +1,5 @@
 from flask_restx import Namespace, Resource, fields, reqparse
+from sqlalchemy import or_, func
 from app.models import Movie, Actor, Director, Genre
 from app.extensions import db
 
@@ -10,6 +11,8 @@ movie_filter_parser.add_argument('genre', type=str)
 movie_filter_parser.add_argument('actor', type=str)
 movie_filter_parser.add_argument('director', type=str)
 movie_filter_parser.add_argument('year', type=int)
+movie_filter_parser.add_argument('search', type=str)
+movie_filter_parser.add_argument('searchType', type=str)
 
 # ---------- Swagger Models ----------
 
@@ -26,7 +29,6 @@ actor_model = movies_ns.model('Actor', {
     'actor_hero_image_url': fields.String,
     'actor_cast_image_url': fields.String
 })
-
 
 genre_model = movies_ns.model('Genre', {
     'id': fields.Integer,
@@ -56,7 +58,6 @@ movie_create_model = movies_ns.model('MovieCreate', {
     'genre_ids': fields.List(fields.Integer),
 })
 
-
 # ---------- Routes ----------
 @movies_ns.route('/')
 class MovieList(Resource):
@@ -68,19 +69,54 @@ class MovieList(Resource):
         args = movie_filter_parser.parse_args()
         query = Movie.query
 
+        # ---- Exact Match Filters (case-insensitive) ----
         if args['genre']:
-            query = query.join(Movie.genres).filter(Genre.name.ilike(f"%{args['genre']}%"))
+            query = query.join(Movie.genres).filter(
+                func.lower(Genre.name) == func.lower(args['genre'])
+            )
 
         if args['actor']:
-            query = query.join(Movie.actors).filter(Actor.name.ilike(f"%{args['actor']}%"))
+            query = query.join(Movie.actors).filter(
+                func.lower(Actor.name) == func.lower(args['actor'])
+            )
 
         if args['director']:
-            query = query.join(Movie.director).filter(Director.name.ilike(f"%{args['director']}%"))
+            query = query.join(Movie.director).filter(
+                func.lower(Director.name) == func.lower(args['director'])
+            )
 
         if args['year']:
             query = query.filter(Movie.release_year == args['year'])
 
-        movies = query.distinct().all()   # <<< THIS FIX PREVENTS POSTGRES CRASH
+        # ---- Keyword Search ----
+        if args['search']:
+            keyword = f"%{args['search']}%"
+            search_type = args['searchType'] or "all"
+
+            if search_type == "movie":
+                query = query.filter(Movie.title.ilike(keyword))
+
+            elif search_type == "actor":
+                query = query.join(Movie.actors).filter(Actor.name.ilike(keyword))
+
+            elif search_type == "director":
+                query = query.join(Movie.director).filter(Director.name.ilike(keyword))
+
+            else:  # all
+                query = (
+                    query
+                    .outerjoin(Movie.actors)
+                    .outerjoin(Movie.director)
+                    .filter(
+                        or_(
+                            Movie.title.ilike(keyword),
+                            Actor.name.ilike(keyword),
+                            Director.name.ilike(keyword)
+                        )
+                    )
+                )
+
+        movies = query.distinct().all()
         return [serialize_movie(m) for m in movies]
 
     @movies_ns.expect(movie_create_model)
@@ -154,7 +190,12 @@ def serialize_movie(movie):
             'director_cast_image_url': movie.director.director_cast_image_url
         } if movie.director else None,
         'actors': [
-            {'id': a.id, 'name': a.name, 'actor_hero_image_url': a.actor_hero_image_url, 'actor_cast_image_url': a.actor_cast_image_url} for a in movie.actors
+            {
+                'id': a.id,
+                'name': a.name,
+                'actor_hero_image_url': a.actor_hero_image_url,
+                'actor_cast_image_url': a.actor_cast_image_url
+            } for a in movie.actors
         ],
         'genres': [
             {'id': g.id, 'name': g.name} for g in movie.genres
